@@ -1,0 +1,12 @@
+# 本地私有与生成产物
+secrets.py
+wcache*.json
+
+# 本地归档(日志/固件/调试脚本/废弃预览)
+_local/
+
+# 系统与工具
+.DS_Store
+__pycache__/
+*.pyc
+.workbuddy/
