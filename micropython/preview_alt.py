@@ -377,7 +377,7 @@ if __name__ == "__main__":
     # 拼 2x 对比图
     Z = 2
     imgs = [Image.open(p) for _, p in outs]
-    lab_font = ImageFont.truetype("/System/Library/Fonts/Hiragino Sans GB.ttc", 26, index=1)
+    lab_font = ImageFont.truetype(G.FONT_PATH, 26, index=G.FONT_INDEX)
     titles = {
         "A": "方案A  天气行增强: 每天天气词(雨日红字) + 去导轨 + 标签白底",
         "B": "方案B  双焦点: 30px大温度 + 今日六项摘要 + 每天天气",

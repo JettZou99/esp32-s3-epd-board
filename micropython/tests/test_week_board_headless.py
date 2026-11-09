@@ -1,7 +1,10 @@
-# test_week_board_headless.py —— 在 Mac 上桩跑设备脚本, 逐像素比对设备画布 vs 预览画布
+# test_week_board_headless.py —— 本地桩跑周看板设备脚本, 逐像素比对设备画布 vs 预览画布
+# 用法: python tests/test_week_board_headless.py (0 差异才算通过)
 import sys, os, types, json, time as _time
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = os.path.dirname(os.path.abspath(__file__))   # micropython/tests
+MP = os.path.dirname(HERE)                          # micropython
+sys.path.insert(0, MP)
 sys.path.insert(0, HERE)
 
 # ---- 桩: machine ----
@@ -62,13 +65,27 @@ tmod.sleep_ms = lambda ms: None
 tmod.ticks_ms = lambda: int(_time.time() * 1000) & 0x7FFFFFFF
 tmod.ticks_diff = lambda a, b: a - b
 tmod.localtime = _time.localtime
+# PIL/logging 在导入时会用到这些真实 time 属性, 桩必须透传, 否则 import gen_week_board 失败
+tmod.time_ns = _time.time_ns
+tmod.monotonic = _time.monotonic
+tmod.perf_counter = _time.perf_counter
+tmod.gmtime = _time.gmtime
+tmod.mktime = _time.mktime
+tmod.strftime = _time.strftime
 sys.modules["time"] = tmod
 
 # ---- 桩: ntptime ----
 sys.modules["ntptime"] = types.ModuleType("ntptime")
 
+# ---- 桩: secrets(测试不依赖本机私有 secrets.py) ----
+secrets_stub = types.ModuleType("secrets")
+secrets_stub.SSID, secrets_stub.PWD = "TEST-SSID", "test-pwd"
+secrets_stub.CITY, secrets_stub.TZ = "青岛", 8 * 3600
+secrets_stub.LAT, secrets_stub.LON = "36.07", "120.38"
+sys.modules["secrets"] = secrets_stub
+
 # ---- 执行设备脚本 ----
-src = open(os.path.join(HERE, "epd_week_board.py"), encoding="utf-8").read()
+src = open(os.path.join(MP, "epd_week_board.py"), encoding="utf-8").read()
 ns = {"__name__": "__main__"}
 try:
     exec(compile(src, "epd_week_board.py", "exec"), ns)

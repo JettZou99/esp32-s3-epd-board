@@ -57,7 +57,7 @@ h = sum(s.height + 18 for _, s in strips) + 10
 out = Image.new("RGB", (w, h), (255, 255, 255))
 d = ImageDraw.Draw(out)
 try:
-    lab = ImageFont.truetype("/System/Library/Fonts/Hiragino Sans GB.ttc", 22, index=1)
+    lab = ImageFont.truetype(G.FONT_PATH, 22, index=G.FONT_INDEX)
 except Exception:
     lab = ImageFont.load_default()
 y = 6

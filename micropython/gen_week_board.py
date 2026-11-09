@@ -6,8 +6,19 @@ import os, sys
 from PIL import Image, ImageDraw, ImageFont
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-FONT_PATH = "/System/Library/Fonts/Hiragino Sans GB.ttc"
-FONT_INDEX = 1  # ttc 内字重选择: 1=细体(W2)。小字号点阵化只有细体不糊字(idx0=W3粗体会粘连)
+
+
+def _pick_font():
+    # 跨平台: Windows 优先, macOS 保留原 Hiragino 细体(W2)作为回退
+    for p, idx in (("C:/Windows/Fonts/msyh.ttc", 0),
+                   ("C:/Windows/Fonts/simhei.ttf", 0),
+                   ("/System/Library/Fonts/Hiragino Sans GB.ttc", 1)):
+        if os.path.exists(p):
+            return p, idx
+    raise SystemExit("no CJK font found")
+
+
+FONT_PATH, FONT_INDEX = _pick_font()
 OUT_PY = os.path.join(HERE, "epd_week_board.py")
 OUT_PNG = os.path.join(HERE, "week_board_preview.png")
 
@@ -84,15 +95,32 @@ def hzk_glyph(ch):
 
 
 def build_font(chars, size):
+    """汉字=HZK16 点阵; ASCII=PIL 渲染并按【墨迹中心】对齐到 HZK16 字模中心,
+    否则数字/符号在混排时明显下沉(与 gen_week_class.py 保持一致)。"""
     f = {}
+    hzk = set()
     for ch in "".join(dict.fromkeys(chars)):
         g = hzk_glyph(ch) if ord(ch) > 127 else None
-        f[ch] = g if g is not None else render_glyph(ch, size)
-    ref = min(g[2] for g in f.values())
+        if g is not None:
+            f[ch] = g
+            hzk.add(ch)
+        else:
+            f[ch] = render_glyph(ch, size)
+    HAN_CY = 7.5
     out = {}
-    for ch in f:
-        g = f[ch]
-        out[ch] = bytes((g[0], g[1], (g[2] - ref) & 0xFF)) + g[3:]
+    for ch, g in f.items():
+        if ch in hzk:
+            out[ch] = g
+            continue
+        w, h, data = g[0], g[1], g[3:]
+        bw = (w + 7) >> 3
+        rows = [yy for yy in range(h) if any(data[yy * bw + xb] for xb in range(bw))]
+        if not rows:
+            out[ch] = g
+            continue
+        c = (min(rows) + max(rows)) / 2
+        dy = max(0, int(round(HAN_CY - c)))
+        out[ch] = bytes((w, h, dy & 0xFF)) + data
     return out
 
 

@@ -1,12 +1,23 @@
-# 本地私有与生成产物
+# ── 私有配置(勿入库) ─────────────────────────────
 secrets.py
 wcache*.json
 
-# 本地归档(日志/固件/调试脚本/废弃预览)
+# ── 本地归档: 固件/日志/一次性调试脚本/废弃预览 ──
+# 整理时把杂物统一移入 _local/, 只移动不删除, 可随时取回
 _local/
+*.bin
+*.log
+*.tmp
+.tmp_pkg/
 
-# 系统与工具
-.DS_Store
+# ── 构建与测试产物(预览图 *_preview.png 入库) ─────
+*_sim.png
+layout_*.png
+micropython/tests/__*.json
 __pycache__/
 *.pyc
+
+# ── 系统与工具 ───────────────────────────────────
+.DS_Store
+Thumbs.db
 .workbuddy/
