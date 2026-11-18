@@ -18,6 +18,8 @@
 
 切换方式见「快速开始」第 5 步。默认应用由设备根目录 `main.py` 的 import 决定。
 
+**整点提示灯**：课表应用在整点用板载 RGB（WS2812B / GPIO48）闪蓝色 3 下（约 0.9 秒），**不刷新墨水屏**。参数在 `week_class_list.py` 顶部：`HOURLY_BLINK`、`BLINK_COLOR`、`BLINK_TIMES`、`BLINK_ON_MS`、`BLINK_OFF_MS`。板上另外三个小灯中，红色电源灯由 3V3 硬接线常亮，TX/RX 灯由 USB 串口芯片驱动，程序均无法控制。
+
 ---
 
 ## 二、硬件与接线
